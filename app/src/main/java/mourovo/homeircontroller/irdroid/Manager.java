@@ -18,6 +18,9 @@ import android.util.Log;
 import java.util.HashMap;
 
 import mourovo.homeircontroller.activity.DebugActivity;
+import mourovo.homeircontroller.app.Logger;
+import mourovo.homeircontroller.irdroid.exception.InvalidResponseException;
+import mourovo.homeircontroller.irdroid.exception.IrdroidException;
 
 public class Manager {
     private final int VENDOR_ID = 1240; // irdroid
@@ -28,6 +31,10 @@ public class Manager {
     private UsbDevice device;
     private String permissionIntentName;
 
+    private Connection connection;
+
+    private Commander commander;
+
     private PendingIntent permissionIntent;
 
     public Manager(Context context) {
@@ -36,11 +43,6 @@ public class Manager {
         permissionIntentName = context.getApplicationInfo().packageName + ".USB_PERMISSION";
     }
 
-    public void setContext(Context context) {
-        this.context = context;
-
-        Log.d("Manager", "changed context to " + context.getClass().toString());
-    }
 
     public void checkAttachedDevice() {
         if(this.device == null) {
@@ -115,11 +117,7 @@ public class Manager {
     }
 
     public void log(String text) {
-        if (this.context instanceof DebugActivity) {
-            ((DebugActivity) this.context).log(text);
-        } else {
-            Log.d("IRDroidManager", text);
-        }
+
     }
 
     private void requestPermission(UsbDevice device) {
@@ -176,37 +174,29 @@ public class Manager {
         }
     };
 
-    public void blink() {
-        final Connection conn = new Connection(this);
-
-        conn.write( getCommandBytes("12"));
-
-        Handler handler =new Handler();
-        Runnable r = new Runnable() {
-            public void run() {
-                conn.write(new byte[] {0x13});
-                conn.close();
+    public Connection getConnection() {
+        if(this.connection == null) {
+            try {
+                this.connection = new Connection(this.usbManager, this.device);
+                this.commander = new Commander(this.connection);
+                this.commander.enterSamplingMode();
+            }catch (IrdroidException e) {
+                e.printStackTrace();
+                Logger.d("Connection failed");
+                this.connection.close();
             }
-        };
-
-        handler.postDelayed(r, 1500);
-    }
-
-    private byte[] getCommandBytes(String cmd) {
-        String[] partSplit = cmd.split(" ");
-        byte bytes[] = new byte[partSplit.length];
-        for (int i = 0; i < partSplit.length; i++) {
-            bytes[i] = (byte) ((Character.digit(partSplit[i].charAt(0), 16) << 4) + Character.digit(partSplit[i].charAt(1), 16));
         }
-        return bytes;
+        return this.connection;
     }
 
-
-    public UsbManager getUsbManager() {
-        return usbManager;
+    public void closeConnection() {
+        if(this.connection != null) {
+            this.connection.close();
+            this.connection = null;
+        }
     }
 
-    public UsbDevice getDevice() {
-        return device;
+    public void blink() {
+
     }
 }

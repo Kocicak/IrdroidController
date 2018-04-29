@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.os.Bundle;
 
 import mourovo.homeircontroller.app.HomeIRApplication;
+import mourovo.homeircontroller.app.Logger;
 
 public abstract class IRActivity extends Activity {
 
@@ -16,6 +17,6 @@ public abstract class IRActivity extends Activity {
     protected void onResume() {
         super.onResume();
 
-        ((HomeIRApplication) getApplication()).getIrManager().setContext(this);
+        Logger.setContext(this);
     }
 }

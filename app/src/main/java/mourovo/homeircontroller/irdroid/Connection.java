@@ -9,36 +9,33 @@ import android.hardware.usb.UsbManager;
 
 import java.io.ByteArrayInputStream;
 
+import mourovo.homeircontroller.app.Logger;
+import mourovo.homeircontroller.irdroid.exception.ConnectionException;
+import mourovo.homeircontroller.irdroid.exception.InvalidResponseException;
+import sun.rmi.runtime.Log;
+
 public class Connection {
     private UsbInterface usbInterface;
     private UsbEndpoint inEndpoint;
     private UsbEndpoint outEndpoint;
     private UsbDeviceConnection connection;
 
-    Manager manager;
+    public Connection(UsbManager manager, UsbDevice device) throws ConnectionException {
+        this.connection =  manager.openDevice(device);
 
-
-    public Connection(Manager manager) {
-
-        this.manager = manager;
-
-        UsbDevice device = manager.getDevice();
-
-        this.connection = manager.getUsbManager().openDevice(device);
-
-        for(int i = 0; i < device.getInterfaceCount(); i++) {
+        for (int i = 0; i < device.getInterfaceCount(); i++) {
             UsbInterface intf = device.getInterface(i);
-            if(intf.getInterfaceClass() == UsbConstants.USB_CLASS_CDC_DATA) {
+            if (intf.getInterfaceClass() == UsbConstants.USB_CLASS_CDC_DATA) {
                 this.usbInterface = intf;
-                manager.log("found cdc interface: intf " + i);
+                Logger.d("found cdc interface: intf " + i);
 
-                for(int j = 0; j < intf.getEndpointCount(); j++) {
+                for (int j = 0; j < intf.getEndpointCount(); j++) {
                     UsbEndpoint ep = intf.getEndpoint(j);
-                    if(ep.getDirection() == UsbConstants.USB_DIR_IN) {
+                    if (ep.getDirection() == UsbConstants.USB_DIR_IN) {
                         inEndpoint = ep;
-                        manager.log("found IN endpoint: " + j);
+                        Logger.d("found IN endpoint: " + j);
                     } else {
-                        manager.log("found OUT endpoint: " + j);
+                        Logger.d("found OUT endpoint: " + j);
                         outEndpoint = ep;
                     }
                 }
@@ -47,33 +44,28 @@ public class Connection {
             }
         }
 
-        if(inEndpoint == null || this.usbInterface == null || outEndpoint == null) {
-            manager.log("No suitable endpoint found.");
-
-            return;
+        if (inEndpoint == null || this.usbInterface == null || outEndpoint == null) {
+            throw new ConnectionException("No suitable endpoint found.");
         }
-
-        write(new byte[] {0,0,0,0,0});
-        write(new byte[] {'s'});
-        read();
     }
 
-    public void close()
-    {
-        if(this.connection != null) {
-            this.connection.releaseInterface(usbInterface);
+    public void close() {
+        if (this.connection != null) {
+            if(this.usbInterface != null) {
+                this.connection.releaseInterface(usbInterface);
+            }
             this.connection.close();
-            manager.log("connection closed");
+            Logger.d("connection closed");
         }
     }
 
-    public void write (byte[] data) {
-        if(!connection.claimInterface(usbInterface,true)) {
-            manager.log("cannot claim interface.");
+    public void write(byte[] data) {
+        if (!connection.claimInterface(usbInterface, true)) {
+            Logger.d("cannot claim interface.");
             return;
         }
         int result = connection.bulkTransfer(outEndpoint, data, data.length, 0);
-        manager.log("transferred (" + result + "): " +  getHexString(data) );
+        Logger.d("transferred (" + result + "): " + getHexString(data));
     }
 
     private String getHexString(byte[] data) {
@@ -88,15 +80,15 @@ public class Connection {
         byte[] buf = new byte[255];
 
         int len = connection.bulkTransfer(inEndpoint, buf, buf.length, 100);
-        if(len == -1) {
+        if (len == -1) {
             return null;
         }
-        manager.log("read(" + len + ")");
+        Logger.d("read(" + len + ")");
 
         byte[] ret = new byte[len];
-        System.arraycopy(buf,0,ret,0,len);
-        manager.log(getHexString(ret));
-        manager.log(new String(ret));
+        System.arraycopy(buf, 0, ret, 0, len);
+        Logger.d(getHexString(ret));
+        Logger.d(new String(ret));
         return ret;
     }
 }
