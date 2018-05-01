@@ -6,18 +6,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
-import android.hardware.usb.UsbDeviceConnection;
-import android.hardware.usb.UsbEndpoint;
-import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
-import android.os.Handler;
-import android.util.Log;
 
 import java.util.HashMap;
 
-import mourovo.homeircontroller.activity.DebugActivity;
 import mourovo.homeircontroller.app.Logger;
 import mourovo.homeircontroller.irdroid.exception.InvalidResponseException;
 import mourovo.homeircontroller.irdroid.exception.IrdroidException;
@@ -33,9 +26,9 @@ public class Manager {
 
     private Connection connection;
 
-    private Commander commander;
-
     private PendingIntent permissionIntent;
+
+    private byte[] recordedCommand;
 
     public Manager(Context context) {
         this.context = context;
@@ -46,9 +39,9 @@ public class Manager {
 
     public void checkAttachedDevice() {
         if(this.device == null) {
-            log("no device attached.");
+            Logger.d("no device attached.");
         } else {
-            log("attached device: " + this.device.getProductName());
+            Logger.d("attached device: " + this.device.getProductName());
         }
     }
 
@@ -62,7 +55,7 @@ public class Manager {
         connectFilter.addAction(UsbManager.ACTION_USB_DEVICE_DETACHED);
         context.registerReceiver(usbDetachReceiver, connectFilter);
 
-        Log.d("receivers","receivers registered");
+        Logger.d("receivers registered");
 
     }
 
@@ -70,28 +63,28 @@ public class Manager {
         context.unregisterReceiver(usbPermissionReceiver);
         context.unregisterReceiver(usbDetachReceiver);
 
-        Log.d("receivers","receivers unregistered");
+        Logger.d("receivers unregistered");
     }
 
     private UsbDevice detectDevice() {
-        log("getting list of devices");
+        Logger.d("getting list of devices");
         HashMap<String, UsbDevice> deviceList = usbManager.getDeviceList();
         for (UsbDevice device : deviceList.values()) {
-            log("found device: " + device.getProductName() + " (" + device.getManufacturerName() + ")");
+            Logger.d("found device: " + device.getProductName() + " (" + device.getManufacturerName() + ")");
             // our device
             if (device.getVendorId() == VENDOR_ID && device.getProductId() == DEVICE_ID) {
-                log("<-- this is our device!!");
+                Logger.d("<-- this is our device!!");
                 return device;
             }
         }
 
-        log("there is no irdoid usb ir transciever.");
+        Logger.d("there is no irdoid usb ir transciever.");
         return null;
     }
 
     private void attachDevice(UsbDevice device) {
         if (device != null) {
-            log("Has permission? " + Boolean.toString(usbManager.hasPermission(device)));
+            Logger.d("Has permission? " + Boolean.toString(usbManager.hasPermission(device)));
             if(usbManager.hasPermission(device)) {
                 setDevice(device);
             }else {
@@ -102,12 +95,12 @@ public class Manager {
 
     private void setDevice(UsbDevice device) {
         this.device = device;
-        log("device" + device.getProductName() + " has been set.");
-        log("device class: " + device.getDeviceClass());
+        Logger.d("device" + device.getProductName() + " has been set.");
+        Logger.d("device class: " + device.getDeviceClass());
     }
 
     private void removeDevice() {
-        log("device " + this.device.getProductName() + " has been removed.");
+        Logger.d("device " + this.device.getProductName() + " has been removed.");
         this.device = null;
     }
 
@@ -116,16 +109,8 @@ public class Manager {
         attachDevice(device);
     }
 
-    public void log(String text) {
-
-    }
-
     private void requestPermission(UsbDevice device) {
         usbManager.requestPermission(device, permissionIntent);
-    }
-
-    public void transmitData(byte[] data) {
-
     }
 
     private final BroadcastReceiver usbPermissionReceiver = new BroadcastReceiver() {
@@ -136,11 +121,11 @@ public class Manager {
                     UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
                     if (intent.getBooleanExtra(UsbManager.EXTRA_PERMISSION_GRANTED, false)) {
                         if (device != null) {
-                            log("permission granted for device " + device.getProductName());
+                            Logger.d("permission granted for device " + device.getProductName());
                             setDevice(device);
                         }
                     } else {
-                        log("permission denied for device " + device.getProductName());
+                        Logger.d("permission denied for device " + device.getProductName());
                     }
 
                 }
@@ -154,19 +139,19 @@ public class Manager {
             synchronized (this) {
                 if (UsbManager.ACTION_USB_DEVICE_DETACHED.equals(action)) {
                     UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
-                    log("some device detached");
+                    Logger.d("some device detached");
                     if (device != null) {
-                        log("detached device " + device.getProductName());
+                        Logger.d("detached device " + device.getProductName());
                         if(device.equals(Manager.this.device)) {
-                            log("that is our device!");
+                            Logger.d("that is our device!");
                             removeDevice();
                         }
                     }
                 } else if(UsbManager.ACTION_USB_DEVICE_ATTACHED.equals(action)) {
                     UsbDevice device = intent.getParcelableExtra(UsbManager.EXTRA_DEVICE);
-                    log("some device attached");
+                    Logger.d("some device attached");
                     if(device != null) {
-                        log("attached device " + device.getProductName());
+                        Logger.d("attached device " + device.getProductName());
                         attachDevice(device);
                     }
                 }
@@ -178,15 +163,27 @@ public class Manager {
         if(this.connection == null) {
             try {
                 this.connection = new Connection(this.usbManager, this.device);
-                this.commander = new Commander(this.connection);
-                this.commander.enterSamplingMode();
             }catch (IrdroidException e) {
                 e.printStackTrace();
                 Logger.d("Connection failed");
                 this.connection.close();
+
+                return null;
             }
         }
+
         return this.connection;
+    }
+
+    public Commander getCommander() {
+        try {
+            return getConnection().getCommander();
+        }catch (IrdroidException e) {
+            e.printStackTrace();
+            Logger.d(e.getMessage());
+        }
+
+        return null;
     }
 
     public void closeConnection() {
@@ -196,7 +193,53 @@ public class Manager {
         }
     }
 
-    public void blink() {
+    public boolean isConnectionActive() {
+        return this.connection != null;
+    }
+
+    public void startRecording() {
+        RecordTask task = new RecordTask(this);
+        task.execute();
+
+        Logger.d("Started recording.");
+    }
+
+    public void setRecordedCommand(byte[] recordedCommand) {
+        this.recordedCommand = recordedCommand;
+        if(this.connection != null) {
+            this.closeConnection();
+        }
+
+        if(recordedCommand == null) {
+            Logger.d("No command recorded.");
+            return;
+        }
+
+        Logger.d("Command recorded:");
+        Logger.d(getHexString(this.recordedCommand));
+    }
+
+
+    public static String getHexString(byte[] data) {
+        String hex = "";
+        for (byte bajt : data) {
+            hex = hex + String.format("0x%02X", (bajt)) + " ";
+        }
+        return hex;
+    }
+
+    public void stopAllActivity(){
+        if(this.connection != null) {
+            try {
+                this.connection.getCommander().reset();
+            } catch (InvalidResponseException e) {
+                e.printStackTrace();
+                Logger.d("Cannot send reset");
+            }
+            this.closeConnection();
+
+            Logger.d("Stopped all activity");
+        }
 
     }
 }

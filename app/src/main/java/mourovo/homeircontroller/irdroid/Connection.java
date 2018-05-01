@@ -7,12 +7,9 @@ import android.hardware.usb.UsbEndpoint;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
 
-import java.io.ByteArrayInputStream;
-
 import mourovo.homeircontroller.app.Logger;
 import mourovo.homeircontroller.irdroid.exception.ConnectionException;
 import mourovo.homeircontroller.irdroid.exception.InvalidResponseException;
-import sun.rmi.runtime.Log;
 
 public class Connection {
     private UsbInterface usbInterface;
@@ -20,7 +17,9 @@ public class Connection {
     private UsbEndpoint outEndpoint;
     private UsbDeviceConnection connection;
 
-    public Connection(UsbManager manager, UsbDevice device) throws ConnectionException {
+    private Commander commander;
+
+    Connection(UsbManager manager, UsbDevice device) throws ConnectionException {
         this.connection =  manager.openDevice(device);
 
         for (int i = 0; i < device.getInterfaceCount(); i++) {
@@ -65,30 +64,32 @@ public class Connection {
             return;
         }
         int result = connection.bulkTransfer(outEndpoint, data, data.length, 0);
-        Logger.d("transferred (" + result + "): " + getHexString(data));
+        Logger.d("transferred (" + result + "): " + Manager.getHexString(data));
     }
 
-    private String getHexString(byte[] data) {
-        String hex = "";
-        for (int i = 0; i < data.length; i++) {
-            hex = hex + String.format("0x%02X", (data[i])) + " ";
-        }
-        return hex;
-    }
+
 
     public byte[] read() {
         byte[] buf = new byte[255];
 
         int len = connection.bulkTransfer(inEndpoint, buf, buf.length, 100);
-        if (len == -1) {
+        if (len <= 0) {
             return null;
         }
         Logger.d("read(" + len + ")");
 
         byte[] ret = new byte[len];
         System.arraycopy(buf, 0, ret, 0, len);
-        Logger.d(getHexString(ret));
+        Logger.d(Manager.getHexString(ret));
         Logger.d(new String(ret));
         return ret;
+    }
+
+    public Commander getCommander() throws InvalidResponseException {
+        if(this.commander == null) {
+            this.commander = new Commander(this);
+            this.commander.enterSamplingMode();
+        }
+        return commander;
     }
 }

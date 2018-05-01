@@ -1,7 +1,6 @@
 package mourovo.homeircontroller.irdroid;
 
-import android.util.Log;
-
+import mourovo.homeircontroller.app.Logger;
 import mourovo.homeircontroller.irdroid.exception.InvalidResponseException;
 
 public class Commander {
@@ -18,13 +17,20 @@ public class Commander {
         this.connection = connection;
     }
 
+    public void reset(){
+        if(this.connection != null) {
+            this.connection.write(RESET);
+            Logger.d("sent reset");
+        }
+    }
+
     public void enterSamplingMode() throws InvalidResponseException {
         if(this.connection != null) {
-            this.connection.write(RESET); // reset
-            this.connection.write(SAMPLING_MODE); // enter sampling mode
+            this.reset();
+            this.connection.write(SAMPLING_MODE);
             byte[] response = this.connection.read();
 
-            if(response.length != 3 || !(new String(response).equals("S01"))) {
+            if(response == null || response.length != 3 || !(new String(response).equals("S01"))) {
                 throw new InvalidResponseException("IRToy did not return 'S01' response, cannot enter sampling mode");
             }
         }
@@ -35,6 +41,8 @@ public class Commander {
     }
 
 
-
+    public void sendLedOff() {
+        connection.write(LED_OFF);
+    }
 
 }
