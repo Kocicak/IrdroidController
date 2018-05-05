@@ -20,7 +20,7 @@ public class Connection {
     private Commander commander;
 
     Connection(UsbManager manager, UsbDevice device) throws ConnectionException {
-        this.connection =  manager.openDevice(device);
+        this.connection = manager.openDevice(device);
 
         for (int i = 0; i < device.getInterfaceCount(); i++) {
             UsbInterface intf = device.getInterface(i);
@@ -50,7 +50,7 @@ public class Connection {
 
     public void close() {
         if (this.connection != null) {
-            if(this.usbInterface != null) {
+            if (this.usbInterface != null) {
                 this.connection.releaseInterface(usbInterface);
             }
             this.connection.close();
@@ -58,38 +58,50 @@ public class Connection {
         }
     }
 
-    public void write(byte[] data) {
+    public int write(byte[] data) {
         if (!connection.claimInterface(usbInterface, true)) {
             Logger.d("cannot claim interface.");
-            return;
+            return 0;
         }
-        int result = connection.bulkTransfer(outEndpoint, data, data.length, 0);
-        Logger.d("transferred (" + result + "): " + Manager.getHexString(data));
+        int result = connection.bulkTransfer(outEndpoint, data, data.length, 100);
+        Logger.d("transferred (" + result + " of " + data.length + "): " + Manager.getHexString(data));
+        return result;
     }
 
 
+    public int read(byte[] buf, int size) {
 
-    public byte[] read() {
-        byte[] buf = new byte[255];
-
-        int len = connection.bulkTransfer(inEndpoint, buf, buf.length, 100);
-        if (len <= 0) {
-            return null;
+        int len = 0;
+        int retries = 0;
+        while(len < size) {
+            int ret = connection.bulkTransfer(inEndpoint, buf, len, size-len, 100);
+            if(ret <= 0) {
+                retries++;
+                if(retries == 10) {
+                    break;
+                }
+                continue;
+            }
+            retries=0;
+            len += ret;
         }
-        Logger.d("read(" + len + ")");
 
-        byte[] ret = new byte[len];
-        System.arraycopy(buf, 0, ret, 0, len);
-        Logger.d(Manager.getHexString(ret));
-        Logger.d(new String(ret));
-        return ret;
+        if(len > 0) {
+            Logger.d("read(" + len + ")");
+            Logger.d(Manager.getHexString(buf));
+        }
+        return len;
     }
 
-    public Commander getCommander() throws InvalidResponseException {
-        if(this.commander == null) {
+    public Commander getCommander() {
+        return this.commander;
+    }
+
+    public Commander getCommander(boolean init) throws InvalidResponseException {
+        if (this.commander == null && init) {
             this.commander = new Commander(this);
             this.commander.enterSamplingMode();
         }
-        return commander;
+        return getCommander();
     }
 }

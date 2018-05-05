@@ -12,8 +12,8 @@ import android.hardware.usb.UsbManager;
 import java.util.HashMap;
 
 import mourovo.homeircontroller.app.Logger;
+import mourovo.homeircontroller.irdroid.exception.ConnectionException;
 import mourovo.homeircontroller.irdroid.exception.InvalidResponseException;
-import mourovo.homeircontroller.irdroid.exception.IrdroidException;
 
 public class Manager {
     private final int VENDOR_ID = 1240; // irdroid
@@ -159,31 +159,22 @@ public class Manager {
         }
     };
 
-    public Connection getConnection() {
+    private void initConnection() throws ConnectionException {
         if(this.connection == null) {
-            try {
-                this.connection = new Connection(this.usbManager, this.device);
-            }catch (IrdroidException e) {
-                e.printStackTrace();
-                Logger.d("Connection failed");
-                this.connection.close();
-
-                return null;
-            }
+            this.connection = new Connection(this.usbManager, this.device);
         }
+    }
 
+    public Connection getConnection() {
         return this.connection;
     }
 
-    public Commander getCommander() {
-        try {
-            return getConnection().getCommander();
-        }catch (IrdroidException e) {
-            e.printStackTrace();
-            Logger.d(e.getMessage());
+    public Connection getConnection(boolean init) throws ConnectionException {
+        if(this.connection == null && init) {
+            initConnection();
         }
 
-        return null;
+        return getConnection();
     }
 
     public void closeConnection() {
@@ -200,8 +191,6 @@ public class Manager {
     public void startRecording() {
         RecordTask task = new RecordTask(this);
         task.execute();
-
-        Logger.d("Started recording.");
     }
 
     public void setRecordedCommand(byte[] recordedCommand) {
@@ -231,7 +220,7 @@ public class Manager {
     public void stopAllActivity(){
         if(this.connection != null) {
             try {
-                this.connection.getCommander().reset();
+                this.connection.getCommander(true).reset();
             } catch (InvalidResponseException e) {
                 e.printStackTrace();
                 Logger.d("Cannot send reset");
@@ -240,6 +229,20 @@ public class Manager {
 
             Logger.d("Stopped all activity");
         }
+    }
 
+    public void transmitRecordedCommand() {
+        if(recordedCommand == null) {
+            Logger.d("First you have to record one.");
+            return;
+        }
+
+        TransmitTask task = new TransmitTask(this);
+        task.execute(this.recordedCommand);
+    }
+
+    public void transmitCommandComplete(Integer bytesTransmitted) {
+        Logger.d("Transmit complete. Transmitted " + bytesTransmitted + " bytes");
+        this.closeConnection();
     }
 }

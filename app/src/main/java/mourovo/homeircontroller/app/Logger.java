@@ -15,7 +15,7 @@ public class Logger {
     }
 
 
-    public static void d (String message) {
+    public static void d(String message) {
         if (context instanceof DebugActivity) {
             ((DebugActivity) context).log(message);
         } else {

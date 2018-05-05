@@ -5,60 +5,70 @@ import android.os.AsyncTask;
 import java.util.Arrays;
 
 import mourovo.homeircontroller.app.Logger;
+import mourovo.homeircontroller.irdroid.exception.IrdroidException;
 
 public class RecordTask extends AsyncTask<Void, Integer, byte[]> {
 
-    private final byte[] FINISHED = new byte[] {-1, -1}; // 2x 0xFF is end of command.
-    private final byte[] ERROR = new byte[] {-1, -1, -1, -1, -1, -1}; // 6x 0xFF is ERROR
+
 
     Manager manager;
 
-    public RecordTask(Manager manager) {
+    RecordTask(Manager manager) {
         this.manager = manager;
-    }
-
-    @Override
-    protected void onPreExecute() {
-        if(manager.getCommander() == null) {
-            this.cancel(true);
-        }
     }
 
     @Override
     protected byte[] doInBackground(Void... voids) {
 
+        Connection connection;
+
+        try {
+            connection = manager.getConnection(true);
+            connection.getCommander(true);
+        } catch (IrdroidException e) {
+            Logger.d("Can't record, can't init connection: " + e.getMessage());
+            this.cancel(true);
+            return null;
+        }
+
+        Logger.d("Started recording.");
+
         byte[] buffer = new byte[4096];
         int len = 0;
 
-        while(true) {
-            if(!manager.isConnectionActive()) {
+        while (true) {
+            if (!manager.isConnectionActive()) {
                 Logger.d("Connection disappeared.");
                 this.cancel(true);
+            }
+            if(this.isCancelled()) {
+                Logger.d("Recording cancelled.");
                 return null;
             }
 
-            byte[] received = manager.getConnection().read();
+            byte[] received = new byte[255];
+            int res = connection.read(received, received.length);
 
-            if(received == null || received.length == 0) {
+            if (res == 0) {
                 continue;
             }
 
-            if(Arrays.equals(received, ERROR)) {
-                return null;
-            }
+            System.arraycopy(received, 0, buffer, len, res);
+            len += res;
+            publishProgress(len);
 
-            System.arraycopy(received,0,buffer,len,received.length);
-            len += received.length;
-
-            if(Arrays.equals(received, FINISHED)) {
+            if(received[res-2] == -1 && received[res-1] == -1) {
+                Logger.d("finished");
                 break;
             }
 
-            publishProgress(len);
+            if (Arrays.equals(received, Commander.COMMAND_ERROR)) {
+                return null;
+            }
         }
 
         byte[] command = new byte[len];
-        System.arraycopy(buffer,0,command,0,len);
+        System.arraycopy(buffer, 0, command, 0, len);
         return command;
 
     }

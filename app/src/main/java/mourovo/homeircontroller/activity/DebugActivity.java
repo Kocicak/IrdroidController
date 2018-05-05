@@ -13,6 +13,8 @@ import java.util.Date;
 import mourovo.homeircontroller.R;
 import mourovo.homeircontroller.app.HomeIRApplication;
 import mourovo.homeircontroller.app.Logger;
+import mourovo.homeircontroller.irdroid.Commander;
+import mourovo.homeircontroller.irdroid.exception.IrdroidException;
 
 
 public class DebugActivity extends IRActivity {
@@ -40,7 +42,7 @@ public class DebugActivity extends IRActivity {
     }
 
     public void onAttachButtonClick(View view) {
-        ((HomeIRApplication)getApplication()).getIrManager().detectAndAttachDevice();
+        ((HomeIRApplication) getApplication()).getIrManager().detectAndAttachDevice();
     }
 
     public void log(final String text) {
@@ -58,19 +60,26 @@ public class DebugActivity extends IRActivity {
                 });
             }
         });
-
-
     }
 
-    public void onTransmitButtonClick(View view) {
-        getIrManager().getCommander().sendLedOn();
+    public void onBlinkButtonClick(View view) {
+        Commander commander;
 
-        Handler handler=new Handler();
-        Runnable r=new Runnable() {
+        try {
+            commander = getIrManager().getConnection(true).getCommander(true);
+            commander.enterSamplingMode();
+        } catch (IrdroidException e) {
+            Logger.d("Cannot blink, not connected: " + e.getMessage());
+            e.printStackTrace();
+            return;
+        }
+
+        commander.sendLedOn();
+
+        Handler handler = new Handler();
+        Runnable r = new Runnable() {
             public void run() {
-                getIrManager().getCommander().sendLedOff();
-
-
+                getIrManager().getConnection().getCommander().sendLedOff();
                 getIrManager().closeConnection();
             }
         };
@@ -78,18 +87,36 @@ public class DebugActivity extends IRActivity {
     }
 
     public void onRecordButtonClick(View view) {
-        if(getIrManager().isConnectionActive()) {
-            Logger.d("Connection is active, cannot record.");
-            return;
-        }
         getIrManager().startRecording();
 
     }
 
     public void onPlayButtonClick(View view) {
+        getIrManager().transmitRecordedCommand();
     }
 
     public void onStopButtonClick(View view) {
         getIrManager().stopAllActivity();
+    }
+
+    public void onClearButtonClick(View view) {
+        tvLogger.setText("");
+    }
+
+    public void onReadButtonClick(View view) {
+        byte[] buf = new byte[8];
+        getIrManager().getConnection(true).read(buf,buf.length);
+        getIrManager().closeConnection();
+
+    }
+
+    public void onWriteButtonClick(View view) {
+        getIrManager().getConnection(true).write(Commander.COMMAND_END);
+        getIrManager().closeConnection();
+    }
+
+    public void onResetButtonClick(View view) {
+        getIrManager().getConnection(true).getCommander(true).enterSamplingMode();
+        getIrManager().closeConnection();
     }
 }

@@ -33,48 +33,97 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
-        <Button
-            android:id="@+id/button3"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="Attach"
-            android:onClick="onAttachButtonClick"
-            android:layout_width="wrap_content" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+            <Button
+                android:id="@+id/button3"
+                android:layout_weight="1"
+                android:layout_height="wrap_content"
+                android:text="Attach"
+                android:onClick="onAttachButtonClick"
+                android:layout_width="wrap_content" />
+            <Button
+                android:id="@+id/buttonBlink"
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Blink"
+                android:onClick="onBlinkButtonClick"
+                />
 
-        <Button
-            android:id="@+id/buttonBlink"
-            android:layout_weight="1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Blink"
-            android:onClick="onTransmitButtonClick"
-            />
-        <Button
-            android:id="@+id/buttonRecord"
-            android:layout_weight="1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Record"
-            android:onClick="onRecordButtonClick"
-            />
-        <Button
-            android:id="@+id/stopButton"
-            android:layout_weight="1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Stop"
-            android:onClick="onStopButtonClick"
-            />
-        <Button
-            android:id="@+id/buttonPlay"
-            android:layout_weight="1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Play"
-            android:onClick="onPlayButtonClick"
-            />
+            <Button
+                android:id="@+id/buttonRecord"
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Record"
+                android:onClick="onRecordButtonClick"
+                />
+            <Button
+                android:id="@+id/stopButton"
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Stop"
+                android:onClick="onStopButtonClick"
+                />
+            <Button
+                android:id="@+id/buttonPlay"
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Play"
+                android:onClick="onPlayButtonClick"
+                />
+            <Button
+                android:id="@+id/buttonClear"
+                android:layout_weight="1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Clear"
+                android:onClick="onClearButtonClick"
+                />
+
+
+        </LinearLayout>
+
+
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="read"
+                android:onClick="onReadButtonClick"
+                />
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="write end"
+                android:onClick="onWriteButtonClick"
+                />
+
+            <Button
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Reset"
+                android:onClick="onResetButtonClick"
+                />
+
+        </LinearLayout>
+
     </LinearLayout>
+
+
+
 
 </RelativeLayout>
