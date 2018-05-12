@@ -17,8 +17,11 @@ import android.widget.RelativeLayout;
 
 import mourovo.homeircontroller.Button.DraggableButton;
 import mourovo.homeircontroller.R;
+import mourovo.homeircontroller.app.HomeIRApplication;
 import mourovo.homeircontroller.fragment.ControllerFragment;
 import mourovo.homeircontroller.fragment.EditControllerFragment;
+import mourovo.homeircontroller.persistence.IRDatabase;
+import mourovo.homeircontroller.persistence.entities.Controller;
 
 public class MainActivity extends IRActivity {
 
@@ -87,6 +90,13 @@ public class MainActivity extends IRActivity {
                 return true;
             }
         });
+
+        Controller ctrl = new Controller();
+        ctrl.setName("TEST CONTROLLER");
+
+        IRDatabase db = ((HomeIRApplication)getApplication()).getDb();
+        db.controllerDao().insertController(ctrl);
+
     }
 
     protected void startDebugActivity() {
