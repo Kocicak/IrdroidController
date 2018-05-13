@@ -53,17 +53,18 @@ public class RecordTask extends AsyncTask<Void, Integer, byte[]> {
                 continue;
             }
 
+            if(res >= 6 && Arrays.equals(Arrays.copyOfRange(received,res-6, res), Commander.COMMAND_ERROR)) {
+                Logger.d("ERROR RECEIVED!");
+                return null;
+            }
+
             System.arraycopy(received, 0, buffer, len, res);
             len += res;
             publishProgress(len);
 
-            if(received[res-2] == -1 && received[res-1] == -1) {
-                Logger.d("finished");
+            if(Arrays.equals(Arrays.copyOfRange(received,res-2,res), Commander.COMMAND_END)) {
+                Logger.d("finished!");
                 break;
-            }
-
-            if (Arrays.equals(received, Commander.COMMAND_ERROR)) {
-                return null;
             }
         }
 
