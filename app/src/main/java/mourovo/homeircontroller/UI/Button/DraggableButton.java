@@ -1,7 +1,6 @@
-package mourovo.homeircontroller.Button;
+package mourovo.homeircontroller.UI.Button;
 
 import android.content.Context;
-import android.support.v7.widget.AppCompatButton;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.widget.Button;

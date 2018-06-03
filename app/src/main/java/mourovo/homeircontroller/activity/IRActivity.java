@@ -6,6 +6,7 @@ import android.os.Bundle;
 import mourovo.homeircontroller.app.HomeIRApplication;
 import mourovo.homeircontroller.app.Logger;
 import mourovo.homeircontroller.irdroid.Manager;
+import mourovo.homeircontroller.persistence.IRDatabase;
 
 public abstract class IRActivity extends Activity {
 
@@ -24,5 +25,9 @@ public abstract class IRActivity extends Activity {
 
     public Manager getIrManager() {
         return ((HomeIRApplication) getApplication()).getIrManager();
+    }
+
+    protected IRDatabase getDatabase() {
+        return ((HomeIRApplication)getApplication()).getDb();
     }
 }

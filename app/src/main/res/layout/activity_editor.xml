@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".activity.EditorActivity">
+
+    <FrameLayout
+        android:id="@+id/edit_controllerFrame"
+        android:layout_width="260dp"
+        android:layout_height="match_parent"
+        android:layout_alignParentRight="true"
+        />
+
+    <RelativeLayout
+        android:id="@+id/edit_controlsColumn"
+        android:layout_toLeftOf="@id/edit_controllerFrame"
+        android:layout_width="260dp"
+        android:layout_height="match_parent"
+        android:padding="8dp"
+        >
+
+        <TextView
+            android:id="@+id/edit_tv_controllerTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Controller"
+            android:textSize="24dp"
+            android:layout_marginBottom="16dp"
+            />
+
+        <TextView
+            android:id="@+id/edit_tv_titleCtrlEdit"
+            android:layout_below="@id/edit_tv_controllerTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Edit Controller"
+            />
+        <LinearLayout
+            android:id="@+id/edit_layout_ctrlButtons"
+            android:layout_below="@id/edit_tv_titleCtrlEdit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            >
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="RENAME"
+                android:backgroundTint="@android:color/holo_blue_light"
+                />
+            <Button
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:backgroundTint="@android:color/holo_red_light"
+                android:text="DELETE"
+                />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/edit_button_ctrlSave"
+            android:layout_below="@id/edit_layout_ctrlButtons"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@android:color/holo_green_dark"
+            android:layout_marginBottom="24dp"
+            android:text="SAVE"
+            />
+
+        <TextView
+            android:id="@+id/edit_tv_titleBtnControl"
+            android:layout_below="@id/edit_button_ctrlSave"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Buttons control"
+            />
+
+        <Button
+            android:id="@+id/edit_button_btnAdd"
+            android:layout_below="@id/edit_tv_titleBtnControl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="ADD"
+            android:backgroundTint="@android:color/holo_green_dark"
+            />
+
+        <RelativeLayout
+            android:id="@+id/edit_layout_btnControls"
+            android:layout_below="@id/edit_button_btnAdd"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"
+            >
+
+            <Button
+                android:id="@+id/edit_button_btnDelete"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@android:color/holo_red_light"
+                android:text="REMOVE"
+                />
+
+            <TextView
+                android:id="@+id/edit_tv_titleBtnHorizSize"
+                android:layout_below="@id/edit_button_btnDelete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Horizontal Size"
+                />
+
+            <SeekBar
+                android:id="@+id/edit_seek_btnHorizSize"
+                android:layout_below="@id/edit_tv_titleBtnHorizSize"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="9"
+                />
+
+            <TextView
+                android:id="@+id/edit_tv_titleBtnVertSize"
+                android:layout_below="@id/edit_seek_btnHorizSize"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Vertical size"
+                />
+
+
+            <SeekBar
+                android:id="@+id/edit_seek_btnVertSize"
+                android:layout_below="@id/edit_tv_titleBtnVertSize"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="9"
+                />
+
+            <TextView
+                android:id="@+id/edit_tv_titleBtnType"
+                android:layout_below="@id/edit_seek_btnVertSize"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Button type"
+                />
+
+            <LinearLayout
+                android:id="@+id/edit_layout_btnTypes"
+                android:layout_below="@id/edit_tv_titleBtnType"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                >
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:backgroundTint="@android:color/holo_blue_dark"
+                    android:text="IMAGE"
+                    />
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:backgroundTint="@android:color/holo_blue_dark"
+                    android:text="TEXT"
+                    />
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/edit_tv_titleBtnAppearance"
+                android:layout_below="@id/edit_layout_btnTypes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Appearance"
+                />
+
+            <Button
+                android:id="@+id/edit_button_btnColor"
+                android:layout_below="@id/edit_tv_titleBtnAppearance"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:backgroundTint="@android:color/holo_purple"
+                android:text="COLOR"
+                />
+
+            <TextView
+                android:id="@+id/edit_tv_titleBtnIR"
+                android:layout_below="@id/edit_button_btnColor"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="IR Controls"
+                />
+
+            <LinearLayout
+                android:id="@+id/edit_layout_btnIRControls"
+                android:layout_below="@id/edit_tv_titleBtnIR"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                >
+
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:backgroundTint="@android:color/holo_red_light"
+                    android:text="RECORD"
+                    />
+                <Button
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:backgroundTint="@android:color/holo_green_dark"
+                    android:text="PLAY"
+                    />
+
+            </LinearLayout>
+
+
+        </RelativeLayout>
+
+
+    </RelativeLayout>
+
+    <com.woxthebox.draglistview.DragListView
+        android:id="@+id/edit_draglist_controllers"
+        android:layout_alignParentStart="true"
+        android:layout_toStartOf="@id/edit_controlsColumn"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</RelativeLayout>

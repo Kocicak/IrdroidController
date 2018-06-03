@@ -43,6 +43,24 @@
                 android:onClick="onDebugButtonClick"
                 android:text="Debug" />
 
+            <Button
+                android:id="@+id/button5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_toLeftOf="@id/button4"
+                android:onClick="onHomeButtonClick"
+                android:text="Home" />
+
+            <Button
+                android:id="@+id/button6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_toLeftOf="@id/button5"
+                android:onClick="onEditButtonClick"
+                android:text="Edit" />
+
 
             <RelativeLayout
                 android:id="@+id/dragGrid"
@@ -54,10 +72,11 @@
                 android:layout_marginTop="84dp"
                 android:background="@android:color/darker_gray">
 
-                <mourovo.homeircontroller.Button.DraggableButton
+                <mourovo.homeircontroller.UI.Button.DraggableImageButton
                     android:id="@+id/dragButton"
                     android:layout_width="60dp"
                     android:layout_height="60dp"
+                    android:src="@mipmap/ic_launcher_round"
                     android:text="D" />
 
             </RelativeLayout>

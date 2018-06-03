@@ -7,6 +7,7 @@ import mourovo.homeircontroller.activity.DebugActivity;
 
 public class Logger {
 
+    // TODO: nejak poresit ten statickej context
     private static Context context;
 
     public static void setContext(Context context) {
